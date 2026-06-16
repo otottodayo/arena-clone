@@ -44,7 +44,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {channel.is_public && <ShareButton />}
+            <ShareButton />
             {isOwner && <AddBlockButton channelId={channel.id} userId={user!.id} />}
           </div>
         </div>
