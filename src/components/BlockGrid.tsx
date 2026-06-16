@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2, ExternalLink } from 'lucide-react'
+import { Trash2, ExternalLink, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Block = {
@@ -15,6 +15,7 @@ type Block = {
 
 export default function BlockGrid({ blocks, isOwner }: { blocks: Block[]; isOwner: boolean }) {
   const router = useRouter()
+  const [lightbox, setLightbox] = useState<Block | null>(null)
 
   async function deleteBlock(id: string) {
     if (!confirm('このブロックを削除しますか？')) return
@@ -24,18 +25,52 @@ export default function BlockGrid({ blocks, isOwner }: { blocks: Block[]; isOwne
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-      {blocks.map(block => (
-        <BlockCard key={block.id} block={block} isOwner={isOwner} onDelete={deleteBlock} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {blocks.map(block => (
+          <BlockCard
+            key={block.id}
+            block={block}
+            isOwner={isOwner}
+            onDelete={deleteBlock}
+            onImageClick={setLightbox}
+          />
+        ))}
+      </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
+            onClick={() => setLightbox(null)}
+          >
+            <X size={28} />
+          </button>
+          <img
+            src={lightbox.image_url!}
+            alt={lightbox.title ?? ''}
+            className="max-w-full max-h-full object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+          {lightbox.title && (
+            <div className="absolute bottom-4 left-0 right-0 text-center text-white/70 text-sm px-4">
+              {lightbox.title}
+            </div>
+          )}
+        </div>
+      )}
+    </>
   )
 }
 
-function BlockCard({ block, isOwner, onDelete }: {
+function BlockCard({ block, isOwner, onDelete, onImageClick }: {
   block: Block
   isOwner: boolean
   onDelete: (id: string) => void
+  onImageClick: (block: Block) => void
 }) {
   const [hover, setHover] = useState(false)
 
@@ -46,7 +81,10 @@ function BlockCard({ block, isOwner, onDelete }: {
       onMouseLeave={() => setHover(false)}
     >
       {block.type === 'image' && block.image_url && (
-        <div className="aspect-square">
+        <div
+          className="aspect-square cursor-pointer"
+          onClick={() => onImageClick(block)}
+        >
           <img
             src={block.image_url}
             alt={block.title ?? ''}
