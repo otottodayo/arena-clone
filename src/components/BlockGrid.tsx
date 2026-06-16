@@ -44,10 +44,10 @@ export default function BlockGrid({ blocks, isOwner }: { blocks: Block[]; isOwne
           onClick={() => setLightbox(null)}
         >
           <button
-            className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
-            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2"
+            onClick={e => { e.stopPropagation(); setLightbox(null) }}
           >
-            <X size={28} />
+            <X size={24} />
           </button>
           <img
             src={lightbox.image_url!}
