@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import AddBlockButton from '@/components/AddBlockButton'
 import BlockGrid from '@/components/BlockGrid'
+import ShareButton from '@/components/ShareButton'
 import { ArrowLeft } from 'lucide-react'
 
 export default async function ChannelPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -42,9 +43,10 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
               )}
             </div>
           </div>
-          {isOwner && (
-            <AddBlockButton channelId={channel.id} userId={user!.id} />
-          )}
+          <div className="flex items-center gap-2">
+            {channel.is_public && <ShareButton />}
+            {isOwner && <AddBlockButton channelId={channel.id} userId={user!.id} />}
+          </div>
         </div>
       </header>
 

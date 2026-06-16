@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Link as LinkIcon, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Channel = {
@@ -16,6 +16,7 @@ type Channel = {
 export default function ChannelCard({ channel }: { channel: Channel }) {
   const router = useRouter()
   const [hover, setHover] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
@@ -23,6 +24,14 @@ export default function ChannelCard({ channel }: { channel: Channel }) {
     const supabase = createClient()
     await supabase.from('channels').delete().eq('id', channel.id)
     router.refresh()
+  }
+
+  async function handleCopy(e: React.MouseEvent) {
+    e.preventDefault()
+    const url = `${window.location.origin}/channels/${channel.slug}`
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -46,12 +55,24 @@ export default function ChannelCard({ channel }: { channel: Channel }) {
         </p>
       </Link>
       {hover && (
-        <button
-          onClick={handleDelete}
-          className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-gray-400 hover:text-red-500 transition-colors shadow-sm"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="absolute top-2 right-2 flex gap-1">
+          {channel.is_public && (
+            <button
+              onClick={handleCopy}
+              className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-gray-400 hover:text-blue-500 transition-colors shadow-sm"
+              title="URLをコピー"
+            >
+              {copied ? <Check size={14} className="text-green-500" /> : <LinkIcon size={14} />}
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-gray-400 hover:text-red-500 transition-colors shadow-sm"
+            title="削除"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       )}
     </div>
   )
